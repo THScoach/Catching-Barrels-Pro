@@ -528,3 +528,14 @@ model SensorSwing {
   // Feedback
   energyLeak String? // "LATE_LEGS", "EARLY_ARMS", etc.
 }
+
+// === MARKETING LEADS (Human 3.0 Quiz) ===
+model QuizAttempt {
+  id        String   @id @default(cuid())
+  email     String   // Can imply a unique constraint if we only want one per email, but for quizzes multiple attempts are okay.
+  name      String?
+  hitterType String // "Spinner" | "Slingshotter" | "Whipper" 
+  answers   Json     // Raw answers
+  
+  createdAt DateTime @default(now())
+}
