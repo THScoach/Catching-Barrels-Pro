@@ -145,22 +145,25 @@ export default function QuizPage() {
     // Intro Screen
     if (step === 0) {
         return (
-            <div className="min-h-screen bg-cb-dark text-white flex items-center justify-center p-6">
+            <div className="min-h-screen bg-barrels-black text-white flex items-center justify-center p-6 font-barrels selection:bg-barrels-red selection:text-white">
                 <div className="max-w-2xl w-full text-center space-y-8">
-                    <div className="text-cb-gold text-lg font-bold tracking-widest uppercase mb-4">The Human 3.0 Audit</div>
-                    <h1 className="text-4xl md:text-6xl font-bold">Discover Your <br />Kinetic Fingerprint.</h1>
-                    <p className="text-xl text-gray-400 max-w-lg mx-auto">
-                        Are you a Spinner, a Slingshotter, or a Whipper? <br />
+                    <div className="text-barrels-red text-sm font-black tracking-[0.2em] uppercase mb-4">The Human 3.0 Audit</div>
+                    <h1 className="text-5xl md:text-7xl font-black uppercase leading-none">
+                        Discover Your <br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500">Kinetic Fingerprint.</span>
+                    </h1>
+                    <p className="text-xl text-gray-400 max-w-lg mx-auto font-medium">
+                        Are you a <span className="text-white">Spinner</span>, a <span className="text-white">Slingshotter</span>, or a <span className="text-white">Whipper</span>? <br />
                         Take this 6-question assessment to unlock your custom Hitter Blueprint.
                     </p>
                     <button
                         onClick={() => setStep(1)}
-                        className="px-10 py-5 bg-cb-gold text-cb-dark font-bold rounded-xl text-xl hover:bg-cb-gold-dark transition-all transform hover:scale-105 shadow-lg shadow-cb-gold/20"
+                        className="px-12 py-6 bg-barrels-red text-white font-black uppercase tracking-widest text-xl hover:bg-white hover:text-barrels-red transition-all rounded-none"
                     >
-                        Start Assessment →
+                        Start Assessment
                     </button>
                     <div className="pt-8">
-                        <Link href="/" className="text-sm text-gray-500 hover:text-white">Back to Home</Link>
+                        <Link href="/" className="text-xs font-bold uppercase tracking-widest text-gray-600 hover:text-white transition-colors">Back to Home</Link>
                     </div>
                 </div>
             </div>
@@ -170,41 +173,41 @@ export default function QuizPage() {
     // Email / Submit Screen
     if (step > QUESTIONS.length) {
         return (
-            <div className="min-h-screen bg-cb-dark text-white flex items-center justify-center p-6">
-                <div className="max-w-md w-full bg-cb-dark-card border border-cb-dark-accent p-8 rounded-2xl shadow-2xl">
-                    <h2 className="text-3xl font-bold mb-2 text-center">Audit Complete.</h2>
-                    <p className="text-gray-400 text-center mb-8">
+            <div className="min-h-screen bg-barrels-black text-white flex items-center justify-center p-6 font-barrels">
+                <div className="max-w-md w-full bg-barrels-grey border border-gray-800 p-10 shadow-2xl">
+                    <h2 className="text-3xl font-black uppercase mb-2 text-center text-white">Audit Complete.</h2>
+                    <p className="text-gray-400 text-center mb-8 font-medium">
                         Enter your details to generate your Custom Blueprint.
                     </p>
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div>
-                            <label className="block text-sm font-medium text-gray-400 mb-1">First Name</label>
+                            <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">First Name</label>
                             <input
                                 type="text"
                                 required
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                className="w-full px-4 py-3 bg-cb-dark border border-gray-700 rounded-lg focus:ring-2 focus:ring-cb-gold focus:border-transparent outline-none text-white"
+                                className="w-full px-5 py-4 bg-black border border-gray-700 focus:border-barrels-red focus:ring-1 focus:ring-barrels-red outline-none text-white placeholder-gray-600 transition-all rounded-none"
                                 placeholder="Shohei"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-400 mb-1">Email Address</label>
+                            <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Email Address</label>
                             <input
                                 type="email"
                                 required
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="w-full px-4 py-3 bg-cb-dark border border-gray-700 rounded-lg focus:ring-2 focus:ring-cb-gold focus:border-transparent outline-none text-white"
+                                className="w-full px-5 py-4 bg-black border border-gray-700 focus:border-barrels-red focus:ring-1 focus:ring-barrels-red outline-none text-white placeholder-gray-600 transition-all rounded-none"
                                 placeholder="shohei@dh.com"
                             />
                         </div>
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="w-full py-4 bg-cb-gold text-cb-dark font-bold rounded-xl hover:bg-cb-gold-dark transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full py-5 bg-white text-black font-black uppercase tracking-widest hover:bg-barrels-red hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed rounded-none"
                         >
-                            {isSubmitting ? "Generating Blueprint..." : "Reveal My Fingerprint"}
+                            {isSubmitting ? "Generating..." : "Reveal My Fingerprint"}
                         </button>
                     </form>
                 </div>
@@ -217,24 +220,24 @@ export default function QuizPage() {
     const progress = (step / QUESTIONS.length) * 100;
 
     return (
-        <div className="min-h-screen bg-cb-dark text-white flex flex-col items-center justify-center p-6">
+        <div className="min-h-screen bg-barrels-black text-white flex flex-col items-center justify-center p-6 font-barrels">
             <div className="w-full max-w-2xl">
                 {/* Progress Bar */}
-                <div className="mb-8">
-                    <div className="flex justify-between text-xs font-medium text-gray-500 mb-2">
-                        <span>Question {step} of {QUESTIONS.length}</span>
+                <div className="mb-12">
+                    <div className="flex justify-between text-xs font-bold uppercase tracking-widest text-gray-500 mb-3">
+                        <span>Question {step} / {QUESTIONS.length}</span>
                         <span>{Math.round(progress)}%</span>
                     </div>
-                    <div className="h-2 w-full bg-gray-800 rounded-full overflow-hidden">
+                    <div className="h-1 w-full bg-gray-900 overflow-hidden">
                         <div
-                            className="h-full bg-cb-gold transition-all duration-500 ease-out"
+                            className="h-full bg-barrels-red transition-all duration-500 ease-out"
                             style={{ width: `${progress}%` }}
                         />
                     </div>
                 </div>
 
                 {/* Question */}
-                <h2 className="text-3xl font-bold mb-8 leading-tight">{question.text}</h2>
+                <h2 className="text-4xl md:text-5xl font-black uppercase mb-12 leading-none text-white tracking-tight">{question.text}</h2>
 
                 {/* Options */}
                 <div className="space-y-4">
@@ -242,10 +245,10 @@ export default function QuizPage() {
                         <button
                             key={idx}
                             onClick={() => handleAnswer(option.type)}
-                            className="w-full text-left p-6 rounded-xl border border-gray-700 hover:border-cb-gold hover:bg-gray-800 transition-all group flex items-center justify-between"
+                            className="w-full text-left p-8 bg-barrels-grey border border-gray-800 hover:border-barrels-red hover:bg-[#222] transition-all group flex items-center justify-between rounded-none"
                         >
-                            <span className="text-lg text-gray-200 group-hover:text-white">{option.text}</span>
-                            <span className="text-gray-500 group-hover:text-cb-gold">→</span>
+                            <span className="text-xl font-bold text-white group-hover:text-barrels-red transition-colors">{option.text}</span>
+                            <span className="text-gray-600 font-bold group-hover:text-barrels-red transition-colors">→</span>
                         </button>
                     ))}
                 </div>

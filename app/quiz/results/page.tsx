@@ -34,51 +34,51 @@ function ResultsContent() {
     const profile = BLUEPRINTS[type] || BLUEPRINTS["Spinner"];
 
     return (
-        <div className="min-h-screen bg-cb-dark text-white flex flex-col items-center justify-center p-6 py-20">
-            <div className="max-w-4xl w-full grid md:grid-cols-2 gap-12 items-center">
+        <div className="min-h-screen bg-barrels-black text-white flex flex-col items-center justify-center p-6 py-20 font-barrels">
+            <div className="max-w-6xl w-full grid md:grid-cols-2 gap-16 items-center">
 
                 {/* Left Column: The Result */}
-                <div className="space-y-6">
-                    <div className="inline-block px-4 py-1 rounded-full bg-cb-gold/10 text-cb-gold text-sm font-bold tracking-widest uppercase">
+                <div className="space-y-8">
+                    <div className="inline-block px-4 py-2 bg-barrels-red text-white text-xs font-black tracking-widest uppercase rounded-none">
                         Audit Complete
                     </div>
-                    <h1 className="text-5xl font-bold leading-tight">
+                    <h1 className="text-6xl md:text-8xl font-black uppercase leading-[0.85] tracking-tighter">
                         {name}, you are a <br />
-                        <span className="text-cb-gold">{profile.title}.</span>
+                        <span className="text-barrels-red">{profile.title}.</span>
                     </h1>
-                    <p className="text-xl text-gray-300 leading-relaxed">
+                    <p className="text-xl text-gray-400 leading-relaxed font-medium max-w-lg border-l-2 border-gray-800 pl-6">
                         {profile.desc}
                     </p>
-                    <div className="p-4 bg-gray-800 rounded-lg border-l-4 border-cb-gold">
-                        <span className="text-gray-400 text-sm uppercase font-bold block mb-1">Pro Comparison</span>
-                        <span className="text-lg font-medium text-white">{profile.pro}</span>
+                    <div className="p-8 bg-barrels-grey border border-gray-800 border-l-4 border-l-barrels-red shadow-2xl">
+                        <span className="text-gray-500 text-xs uppercase font-bold tracking-widest block mb-2">Pro Comparison</span>
+                        <span className="text-2xl font-black text-white uppercase italic">{profile.pro}</span>
                     </div>
 
-                    <div className="pt-6">
+                    <div className="pt-8">
                         <Link
                             href="/auth/signup"
-                            className="inline-block w-full text-center px-8 py-4 bg-cb-gold text-cb-dark font-bold rounded-xl text-lg hover:bg-cb-gold-dark transition-all shadow-lg shadow-cb-gold/20"
+                            className="inline-block w-full text-center px-8 py-5 bg-white text-black font-black uppercase tracking-widest text-lg hover:bg-barrels-red hover:text-white transition-all rounded-none"
                         >
                             Start Full Analysis Program
                         </Link>
-                        <p className="text-center text-sm text-gray-500 mt-3">
-                            Get your full biomechanics score inside.
+                        <p className="text-center text-xs font-bold text-gray-600 mt-4 uppercase tracking-widest">
+                            Get your full biomechanics score inside
                         </p>
                     </div>
                 </div>
 
                 {/* Right Column: The Lead Magnet (AI Prompt) */}
-                <div className="bg-cb-dark-card border border-cb-dark-accent rounded-2xl p-8 relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 p-4 opacity-50 text-6xl">🤖</div>
+                <div className="bg-barrels-grey border border-gray-800 p-10 relative overflow-hidden group shadow-2xl rounded-none">
+                    <div className="absolute top-0 right-0 p-6 opacity-10 text-9xl text-white font-black select-none">AI</div>
 
-                    <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                        <span className="text-cb-gold">🎁</span> Your Custom AI Prompt
+                    <h3 className="text-2xl font-black uppercase mb-6 flex items-center gap-3 tracking-wide">
+                        <span className="text-barrels-red">🎁</span> Your Custom AI Prompt
                     </h3>
-                    <p className="text-sm text-gray-400 mb-6">
+                    <p className="text-sm text-gray-400 mb-8 font-medium leading-relaxed">
                         Copy and paste this into ChatGPT or Claude to get a customized training plan based on your Kinetic Fingerprint.
                     </p>
 
-                    <div className="bg-black/50 rounded-lg p-5 font-mono text-sm text-green-400 border border-white/10 relative">
+                    <div className="bg-black p-6 font-mono text-xs text-barrels-red border border-gray-800 relative rounded-none shadow-inner">
                         {profile.prompt}
                     </div>
 
@@ -87,7 +87,7 @@ function ResultsContent() {
                             navigator.clipboard.writeText(profile.prompt);
                             alert("Prompt copied to clipboard!");
                         }}
-                        className="mt-6 w-full py-3 border border-gray-600 rounded-lg font-medium hover:border-cb-gold hover:text-cb-gold transition-colors"
+                        className="mt-8 w-full py-4 border border-gray-700 font-bold uppercase tracking-widest hover:border-barrels-red hover:text-barrels-red hover:bg-black transition-all text-sm rounded-none"
                     >
                         Copy Prompt
                     </button>
