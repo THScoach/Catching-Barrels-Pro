@@ -23,10 +23,15 @@ export default async function RootLayout({
   // Get user if authenticated to pass role/name to TopNav
   let user = null;
   if (session?.user?.email) {
-    user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      select: { name: true, email: true, role: true },
-    });
+    try {
+      user = await prisma.user.findUnique({
+        where: { email: session.user.email },
+        select: { name: true, email: true, role: true },
+      });
+    } catch (e) {
+      console.error("RootLayout DB Error:", e);
+      // User remains null, app renders without top nav user info, avoiding crash.
+    }
   }
 
   return (
