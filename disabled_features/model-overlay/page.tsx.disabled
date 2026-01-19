@@ -1,0 +1,244 @@
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+import { prisma } from '@/lib/prisma';
+import { redirect } from 'next/navigation';
+import Link from 'next/link';
+
+export default async function ModelOverlayPage() {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) redirect('/auth/signin');
+
+    const user = await prisma.user.findUnique({
+        where: { email: session.user.email },
+        include: {
+            lessons: {
+                where: { status: 'completed' },
+                orderBy: { createdAt: 'desc' },
+                take: 10,
+                include: {
+                    swingVideos: { take: 1 },
+                },
+            },
+        },
+    });
+
+    if (!user) redirect('/auth/signin');
+
+    // Get available pro models
+    const proModels = await prisma.proModel.findMany({
+        orderBy: { name: 'asc' },
+    });
+
+    return (
+        <div className="min-h-screen bg-cb-dark">
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+                <div className="mb-8">
+                    <h1 className="text-4xl font-bold text-white mb-2">
+                        Model Overlay
+                    </h1>
+                    <p className="text-gray-400">
+                        Compare your swing mechanics to elite pro models
+                    </p>
+                </div>
+
+                {/* Pro Model Selection */}
+                <div className="mb-8">
+                    <h2 className="text-2xl font-bold text-white mb-4">
+                        Choose a Pro Model
+                    </h2>
+                    <div className="grid md:grid-cols-3 gap-4">
+                        {proModels.map((pro) => (
+                            <ProModelCard key={pro.id} proModel={pro} />
+                        ))}
+                    </div>
+                </div>
+
+                {/* Recent Lessons */}
+                <div>
+                    <h2 className="text-2xl font-bold text-white mb-4">
+                        Select Your Swing
+                    </h2>
+                    <div className="space-y-4">
+                        {user.lessons.map((lesson) => (
+                            <LessonCard key={lesson.id} lesson={lesson} />
+                        ))}
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    );
+}
+
+function ProModelCard({ proModel }: { proModel: any }) {
+    return (
+        <div className="bg-gradient-to-br from-cb-gold to-yellow-600 rounded-2xl p-6 text-cb-dark">
+            {/* Placeholder for avatar if not available */}
+            <div className="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-white shadow-lg bg-gray-300 overflow-hidden">
+                {proModel.avatarUrl ? (
+                    <img
+                        src={proModel.avatarUrl}
+                        alt={proModel.name}
+                        className="w-full h-full object-cover"
+                    />
+                ) : (
+                    <div className="w-full h-full flex items-center justify-center text-2xl font-bold text-gray-500">
+                        {proModel.name.charAt(0)}
+                    </div>
+                )}
+            </div>
+            <h3 className="text-xl font-bold text-center mb-1">{proModel.name}</h3>
+            <p className="text-sm text-center opacity-80 mb-4">
+                {proModel.team} • {proModel.position}
+            </p>
+            <div className="grid grid-cols-2 gap-2 text-sm mb-4">
+                <div>
+                    <div className="opacity-70">Barrel</div>
+                    <div className="font-bold">{proModel.barrelScore}</div>
+                </div>
+                <div>
+                    <div className="opacity-70">Exit Velo</div>
+                    <div className="font-bold">{proModel.avgExitVelo} mph</div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function LessonCard({ lesson }: { lesson: any }) {
+    return (
+        <div className="bg-cb-dark-card rounded-xl p-6 border border-cb-dark-accent">
+            <div className="flex justify-between items-center">
+                <div>
+                    <h3 className="text-lg font-bold text-white">{lesson.name}</h3>
+                    <p className="text-sm text-gray-400">
+                        {new Date(lesson.createdAt).toLocaleDateString()}
+                    </p>
+                </div>
+                {/* We need to pass both lessonId and proModelId to generate.
+            For now, let's just link to a generation page or handle selection state.
+            The current design implies selecting a swing, then maybe a pro model?
+            Or selecting a pro model first?
+            The prompt says "Select Your Swing" list.
+            Let's assume the user selects a swing and it takes them to a comparison setup or generation.
+            Since we don't have a dedicated generation page yet, let's just link to a placeholder or assume a default pro model for now?
+            Or maybe the UI should allow selecting a pro model (state) and then a lesson.
+            Since this is a server component, we can't hold state easily without client components.
+            Let's make the "Compare" button link to a client component that handles the API call,
+            or link to a new page `app/model-overlay/[lessonId]/page.tsx` where they select the pro model?
+
+            The prompt instruction was just `app/model-overlay/page.tsx`.
+            Let's keep it simple: The "Compare" button could just log for now or link to a "coming soon" action.
+
+            Actually, the API route expects `swingVideoId` and `proModelId`.
+            So we need to select a specific swing video from the lesson.
+            `lesson.swings[0]` is available.
+
+            Let's make the button link to `/model-overlay/generate?lessonId=${lesson.id}` as per the prompt example code.
+            But that page doesn't exist yet.
+            I'll stick to the prompt's example code for the Link.
+        */}
+                <Link
+                    href={`/model-overlay/generate?lessonId=${lesson.id}`}
+                    className="px-6 py-3 bg-cb-gold text-cb-dark font-bold rounded-lg hover:bg-cb-gold-dark transition-colors"
+                >
+                    Compare
+                </Link>
+            </div>
+        </div>
+    );
+}
+
+// --- Components ---
+
+function ScoreCardResult({ scores, metrics, gifUrl, drills }: any) {
+    return (
+        <div className="space-y-8">
+            {/* GIF Display */}
+            <div className="bg-black rounded-2xl overflow-hidden shadow-2xl border border-gray-800">
+                <img src={gifUrl} alt="Swing Analysis" className="w-full h-auto" />
+            </div>
+
+            {/* Score Card */}
+            <div className="bg-cb-dark-card rounded-2xl p-6 border border-cb-dark-accent">
+                <h2 className="text-2xl font-bold text-white mb-6">Swing Analysis</h2>
+
+                <div className="space-y-6">
+                    <ScoreRow
+                        label="⚡ Ground Connection"
+                        score={scores.groundConnection}
+                        feedback={metrics.ground.feedback}
+                    />
+                    <ScoreRow
+                        label="🔄 Rotation Power"
+                        score={scores.rotationPower}
+                        feedback={metrics.rotation.feedback}
+                    />
+                    <ScoreRow
+                        label="💥 Whip Action"
+                        score={scores.whipAction}
+                        feedback={metrics.whip.feedback}
+                    />
+                    <ScoreRow
+                        label="⏱️ Chain Reaction"
+                        score={scores.chainReaction}
+                        feedback={metrics.chain.feedback}
+                    />
+                </div>
+
+                <div className="mt-8 pt-6 border-t border-gray-700">
+                    <div className="flex justify-between items-center">
+                        <span className="text-xl font-bold text-white">Overall Match</span>
+                        <span className="text-3xl font-bold text-cb-gold">{scores.overallMatch}%</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Drill Recommendations */}
+            <div>
+                <h3 className="text-xl font-bold text-white mb-4">Recommended Drills</h3>
+                <div className="grid md:grid-cols-3 gap-4">
+                    {drills.map((drill: any, i: number) => (
+                        <div key={i} className="bg-cb-dark-card p-4 rounded-xl border border-gray-700">
+                            <div className="aspect-video bg-gray-800 rounded-lg mb-3 flex items-center justify-center">
+                                <span className="text-4xl">▶️</span>
+                            </div>
+                            <h4 className="font-bold text-white mb-1">{drill.name}</h4>
+                            <button className="text-cb-gold text-sm font-bold hover:underline">
+                                Watch Video
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function ScoreRow({ label, score, feedback }: any) {
+    const getColor = (s: number) => {
+        if (s >= 90) return 'bg-green-500';
+        if (s >= 75) return 'bg-green-400';
+        if (s >= 60) return 'bg-yellow-500';
+        return 'bg-red-500';
+    };
+
+    return (
+        <div>
+            <div className="flex justify-between mb-2">
+                <span className="font-bold text-white">{label}</span>
+                <span className={`font-bold ${score >= 75 ? 'text-green-400' : 'text-yellow-500'}`}>
+                    {score}%
+                </span>
+            </div>
+            <div className="h-3 bg-gray-700 rounded-full overflow-hidden mb-2">
+                <div
+                    className={`h-full ${getColor(score)}`}
+                    style={{ width: `${score}%` }}
+                />
+            </div>
+            <p className="text-sm text-gray-400">{feedback}</p>
+        </div>
+    );
+}

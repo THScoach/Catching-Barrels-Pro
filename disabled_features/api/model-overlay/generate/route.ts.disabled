@@ -1,0 +1,37 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+import { prisma } from '@/lib/prisma';
+
+// Temporarily disabled to fix Vercel build (canvas/ffmpeg issues)
+// import {
+//     extractPoseFromVideo,
+//     detectSwingCheckpoints,
+//     PoseFrame,
+// } from '@/lib/poseEstimation/extractPose';
+// import {
+//     scaleProModelToAthlete,
+//     alignModels,
+// } from '@/lib/modelOverlay/scaleModel';
+// import { renderSkeletonOverlay, generateOverlayGif } from '@/lib/modelOverlay/renderOverlay';
+// import { calculatePowerScores } from '@/lib/powerSystem/calculations';
+// import { getRecommendedDrills } from '@/lib/powerSystem/drillRecommendations';
+// import path from 'path';
+// import fs from 'fs';
+// import ffmpeg from 'fluent-ffmpeg';
+
+export async function POST(request: NextRequest) {
+    return NextResponse.json(
+        { error: 'Model Overlay feature is temporarily disabled for maintenance.' },
+        { status: 503 }
+    );
+}
+
+// export async function POST_DISABLED(request: NextRequest) {
+//     try {
+//         const session = await getServerSession(authOptions);
+//         if (!session?.user?.email) {
+//             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+//         }
+// ... (rest of the code commented out)
+

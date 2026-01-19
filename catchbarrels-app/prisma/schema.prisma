@@ -1,0 +1,446 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("athlete") // "parent" | "athlete" | "coach" | "admin"
+  
+  // Parent-Athlete Relationship
+  parentId  String?
+  parent    User?    @relation("ParentAthletes", fields: [parentId], references: [id])
+  athletes  User[]   @relation("ParentAthletes")
+  
+  // Physical Attributes (Athletes only)
+  height      Float?      // inches
+  weight      Float?      // pounds
+  birthDate   DateTime?
+  position    String?     
+  stance      String?     
+  batHand     String?     
+  throwHand   String?     
+  
+  // Profile Completion Tracking
+  profileCompleted    Boolean   @default(false)
+  profileCompletedAt  DateTime?
+  profileLastReminded DateTime?
+  firstLoginCompleted Boolean   @default(false)
+  mustChangePassword  Boolean   @default(false)
+  
+  // Subscription (Parents only)
+  stripeCustomerId     String?   @unique
+  stripeSubscriptionId String?
+  subscriptionStatus   String?
+  subscriptionPlan     String?
+  
+  // Profile Photo
+  profilePhotoUrl String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // SUBSCRIPTION TIER (determines lessons per week)
+  subscriptionTier String @default("basic")  // "basic" | "pro" | "elite"
+  // - basic: 1 lesson/week
+  // - pro: 2 lessons/week  
+  // - elite: unlimited lessons/week
+  
+  lessons     Lesson[]
+  // swingVideos removed to match production DB schema and fix relation error
+  comparisons Comparison[]
+  playerProfile PlayerProfile?
+  reminders   ProfileUpdateReminder[]
+}
+
+model ProfileUpdateReminder {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  
+  reminderType String  // "soft" | "hard"
+  sentAt       DateTime @default(now())
+  dismissedAt  DateTime?
+  completedAt  DateTime?
+}
+
+model PlayerProfile {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id])
+  position      String?
+  battingStance String?
+  coachNotes    String?
+  rebootPlayerId String? // ID in Reboot Motion system (org_player_id)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Lesson {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name        String   // "Live BP Session - Nov 28"
+  sessionType String   // "bp" | "tee" | "soft-toss" | "game" | "machine" | "practice"
+  
+  // STATUS - CRITICAL FOR WORKFLOW
+  status      String   @default("active")  // "active" | "completed"
+  // - "active": Lesson is in progress, can add swings (max 15)
+  // - "completed": Lesson is finished, scores calculated, counts against subscription
+  
+  // Calculated Scores (from all swings in lesson - calculated when status = "completed")
+  overallScore  Float?
+  barrelScore   Float?
+  groundScore   Float?
+  coreScore     Float?
+  whipScore     Float?
+  
+  // Aggregated Stats
+  totalSwings   Int      @default(0)  // Max 15
+  avgExitVelo   Float?
+  avgBatSpeed   Float?
+  avgLaunchAngle Float?
+  
+  // Coach Notes
+  coachNotes    String?
+  
+  // Optional: Facility data file
+  facilityDataUrl String?  // CSV from HitTrax, Rapsodo, etc.
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  completedAt DateTime?  // When lesson was ended
+  
+  // Relations
+  swingVideos SwingVideo[]
+  comparedAs1 Comparison[] @relation("lesson1")
+  comparedAs2 Comparison[] @relation("lesson2")
+}
+
+model SwingVideo {
+  id           String        @id @default(cuid())
+  
+  // Link to lesson instead of directly to user
+  lessonId     String
+  lesson       Lesson        @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  
+  // playerId removed to match production DB schema
+
+  videoUrl     String
+  thumbnailUrl String?
+  rebootSessionId String? // ID from Reboot Motion
+  
+  // Individual swing metadata
+  swingNumber  Int?     // Order within lesson (1, 2, 3...)
+  timestamp    DateTime? // When swing occurred
+  notes        String?
+
+  uploadedAt   DateTime      @default(now())
+  analyzedAt   DateTime?
+  comparisons Comparison[]
+  swingMetrics SwingMetrics?
+}
+
+model SwingMetrics {
+  id           String     @id @default(cuid())
+  swingVideoId String     @unique
+  swingVideo   SwingVideo @relation(fields: [swingVideoId], references: [id])
+  
+  // Existing fields
+  exitVelocity Float?
+  launchAngle  Float?
+  batSpeed     Float?
+  notes        String?
+
+  // === BARREL SCORE COMPONENTS ===
+  hardHitRate   Float?
+  barrelRate    Float?
+  squaredUpRate Float?
+  sweetSpotRate Float?
+  
+  // === GROUND SCORE COMPONENTS ===
+  pelvicAngularVelocity Float?
+  hipShoulderSeparation Float?
+  strideLength          Float?
+  strideDirection       Float?
+  weightTransfer        Float?
+  
+  // === CORE SCORE COMPONENTS ===
+  torsoAngularVelocity   Float?
+  rotationalAcceleration Float?
+  kinematicSequence      String?
+  earlyConnection        Float?
+  connectionAtImpact     Float?
+  onPlaneEfficiency      Float?
+  
+  // === WHIP SCORE COMPONENTS ===
+  peakBatSpeed  Float?
+  attackAngle   Float?
+  swingPathTilt Float?
+  timeToContact Float?
+  swingLength   Float?
+  handSpeed     Float?
+
+  // === ADDITIONAL METRICS ===
+  distance      Float?
+  sprayAngle    Float?
+  contactDepth  Float?
+  smashFactor   Float?
+  
+  // === CALCULATED SCORES ===
+  barrelScore  Float?
+  groundScore  Float?
+  coreScore    Float?
+  whipScore    Float?
+  overallScore Float?
+  
+  // === METADATA ===
+  dataSource     String?
+  sessionType    String?
+  videoTimestamp Float?
+
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model ProModel {
+  id          String   @id @default(cuid())
+  
+  // Pro Player Info
+  name        String   // "Mike Trout"
+  position    String?   // "CF"
+  team        String?   // "Los Angeles Angels"
+  handedness  String?   // "Right" or "Left"
+  
+  // Video & Analysis
+  videoUrl    String?   // Cloudinary URL to swing video
+  thumbnailUrl String?  // Thumbnail image
+  
+  // Biomechanical Data (from our analysis)
+  anchorScore Float?    // 0-10 (was groundScore)
+  coreScore   Float?    // 0-10
+  whipScore   Float?    // 0-10
+  barrelScore Float?    // 0-10
+  overallScore Float?   // 0-10
+  
+  // Skeleton Data (JSON)
+  skeletonData Json?   // Frame-by-frame keypoints
+  
+  // Metadata
+  description String?  // "Elite bat speed with exceptional hip rotation"
+  tags        String[] // ["power", "quick hands", "elite"]
+  
+  featured    Boolean  @default(false)
+  isProModel  Boolean  @default(false) // Toggle to show in comparison list
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  comparisons Comparison[]
+  
+  @@index([handedness])
+  @@index([featured])
+  @@index([isProModel])
+}
+
+model Comparison {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Lesson Comparison (Existing)
+  lessonId1   String?
+  lesson1     Lesson?  @relation("lesson1", fields: [lessonId1], references: [id])
+  lessonId2   String?
+  lesson2     Lesson?  @relation("lesson2", fields: [lessonId2], references: [id])
+  
+  // Pro Model Comparison (New)
+  swingId     String?
+  swing       SwingVideo? @relation(fields: [swingId], references: [id])
+  proModelId  String?
+  proModel    ProModel?   @relation(fields: [proModelId], references: [id])
+  
+  // Legacy fields (can keep or deprecate)
+  swingId1    String?
+  swingId2    String?
+  proAvatarId String?
+
+  // Metadata
+  notes       String?
+  favorite    Boolean  @default(false)
+  
+  // Insights (Existing)
+  insights    String?   @db.Text
+  improvements String[]
+  regressions  String[]
+  
+  // Recommendations
+  recommendedDrills String[]
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([userId])
+  @@index([swingId])
+  @@index([proModelId])
+}
+
+// === PLAYER REGISTRATION SYSTEM (Phase 3.5) ===
+
+model Athlete {
+  id            String   @id @default(cuid())
+  
+  // Player Info
+  firstName     String
+  lastName      String
+  email         String?
+  dateOfBirth   DateTime
+  
+  // Physical Stats
+  height        Float?   // inches
+  weight        Float?   // lbs
+  handedness    String?  // L/R/Switch
+  position      String?
+  
+  // Program
+  program       String   // "Augusta" etc.
+  teamName      String?
+  season        String?  // "Winter 2025"
+  
+  // Parent/Guardian
+  parentName    String
+  parentEmail   String
+  parentPhone   String
+  
+  // Status
+  status        String   @default("active")  // active/inactive
+  registeredAt  DateTime @default(now())
+  
+  // Video Analysis
+  swings        Swing[]
+  enrollments   LessonEnrollment[]
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Swing {
+  id           String   @id @default(cuid())
+  
+  athlete      Athlete  @relation(fields: [athleteId], references: [id])
+  athleteId    String
+  
+  videoUrl     String
+  analyzedAt   DateTime @default(now())
+  
+  // Scores
+  anchorScore  Float
+  coreScore    Float
+  whipScore    Float
+  overallScore Float
+  
+  // Biomechanics
+  metrics      Json
+  
+  notes        String?
+  
+  createdAt    DateTime @default(now())
+}
+
+// === SYSTEM DASHBOARD & LESSONS (Phase 3.6) ===
+
+model TrainingLesson {
+  id          String   @id @default(cuid())
+  
+  // Lesson Info
+  title       String   // "Anchor Development - Week 1"
+  description String?
+  category    String   // "Anchor" | "Core" | "Whip" | "General"
+  level       String   // "Beginner" | "Intermediate" | "Advanced"
+  
+  // Content
+  drills      Json     // Array of drill objects
+  videos      String[] // Video URLs
+  duration    Int      // Minutes
+  
+  // Tracking
+  enrollments LessonEnrollment[]
+  
+  // Metadata
+  createdBy   String?  // Coach/admin who created
+  isActive    Boolean  @default(true)
+  featured    Boolean  @default(false)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model LessonEnrollment {
+  id         String   @id @default(cuid())
+  
+  lesson     TrainingLesson @relation(fields: [lessonId], references: [id])
+  lessonId   String
+  
+  athlete    Athlete  @relation(fields: [athleteId], references: [id])
+  athleteId  String
+  
+  // Progress
+  status     String   @default("not_started") // "not_started" | "in_progress" | "completed"
+  progress   Float    @default(0)  // 0-100
+  
+  // Completion tracking
+  completedDrills Json[]
+  lastAccessed    DateTime?
+  completedAt     DateTime?
+  
+  // Feedback
+  feedback   String?
+  rating     Int?     // 1-5
+  
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  @@unique([lessonId, athleteId])
+}
+
+model Drill {
+  id          String   @id @default(cuid())
+  
+  // Drill Info
+  name        String   // "Single-Leg Deceleration"
+  description String
+  category    String   // "Anchor" | "Core" | "Whip"
+  
+  // Equipment
+  equipment   String[] // ["BOSU ball", "Force pedals"]
+  
+  // Instructions
+  setup       String
+  execution   String[]  // Step-by-step
+  cues        String[]  // Coaching cues
+  
+  // Media
+  videoUrl    String?
+  thumbnailUrl String?
+  
+  // Metrics
+  sets        Int?
+  reps        Int?
+  duration    Int?     // Seconds
+  
+  // Organization
+  featured    Boolean  @default(false)
+  difficulty  String   // "Beginner" | "Intermediate" | "Advanced"
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
