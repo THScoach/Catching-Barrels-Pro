@@ -1,4 +1,5 @@
-import { calculateKineticFingerprint, calculateScores } from "../../lib/scoreCalculations";
+import { calculateKineticFingerprint, calculateScores } from "../lib/scoreCalculations";
+
 
 // Mock Sensor Data
 const mockSensorData = {

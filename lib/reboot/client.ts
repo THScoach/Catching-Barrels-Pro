@@ -218,4 +218,17 @@ export class RebootClient {
             (p.org_player_id && p.org_player_id.toLowerCase().includes(lowerQuery))
         );
     }
+
+    // POLL /jobs/{job_id} to check status
+    async getJobStatus(jobId: string) {
+        if (!this.apiKey) throw new Error('REBOOT_API_KEY is missing');
+        const url = `${this.baseUrl}/jobs/${jobId}`;
+        const response = await fetch(url, { headers: this.getAuthHeaders() });
+
+        if (!response.ok) {
+            // 404 might mean job doesn't exist or is old, handle gracefully
+            throw new Error(`Reboot API Error: ${response.status} ${response.statusText}`);
+        }
+        return response.json();
+    }
 }
