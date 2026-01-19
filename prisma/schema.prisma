@@ -149,7 +149,7 @@ model SwingVideo {
   analyzedAt   DateTime?
   comparisons  Comparison[]
   swingMetrics SwingMetrics?
-  SensorSwing  SensorSwing?
+  sensorSwing  SensorSwing?
 }
 
 model SwingMetrics {
