@@ -99,13 +99,15 @@ export default async function DashboardPage() {
         ) : (
           <div className="bg-cb-dark-card rounded-2xl p-12 mb-8 border border-cb-dark-accent text-center">
             <div className="text-6xl mb-4">⚾</div>
-            <h2 className="text-2xl font-bold text-white mb-2">No Lessons Yet</h2>
-            <p className="text-gray-400 mb-6">Start tracking your progress by creating your first lesson</p>
+            <h2 className="text-2xl font-bold text-white mb-2">Welcome, Coach!</h2>
+            <p className="text-gray-400 mb-6">
+              Your database is clean. Click below to add your first player or session.
+            </p>
             <Link
               href="/new-lesson"
               className="inline-block px-8 py-4 bg-cb-gold text-cb-dark font-bold rounded-xl hover:bg-cb-gold-dark transition-all shadow-lg"
             >
-              Create Your First Lesson
+              Start New Session
             </Link>
           </div>
         )}
