@@ -13,7 +13,10 @@ export default async function LessonDetailPage({ params }: { params: { id: strin
         include: {
             user: { select: { name: true, email: true } },
             swingVideos: {
-                include: { swingMetrics: true },
+                include: {
+                    swingMetrics: true,
+                    sensorSwing: true
+                },
                 orderBy: { swingNumber: "asc" },
             },
         },
@@ -177,10 +180,18 @@ export default async function LessonDetailPage({ params }: { params: { id: strin
                                                     {swing.timestamp ? new Date(swing.timestamp).toLocaleTimeString() : "No timestamp"}
                                                 </p>
                                             </div>
-                                            {swing.swingMetrics?.overallScore && (
-                                                <div className="text-2xl font-bold text-cb-gold">
-                                                    {Math.round(swing.swingMetrics.overallScore)}
+                                            {/* Processing Badge */}
+                                            {swing.sensorSwing?.rebootJobId && !swing.sensorSwing?.batScore ? (
+                                                <div className="flex items-center gap-2 text-cb-yellow">
+                                                    <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full"></div>
+                                                    <span className="font-bold text-sm">Processing...</span>
                                                 </div>
+                                            ) : (
+                                                swing.swingMetrics?.overallScore && (
+                                                    <div className="text-2xl font-bold text-cb-gold">
+                                                        {Math.round(swing.swingMetrics.overallScore)}
+                                                    </div>
+                                                )
                                             )}
                                         </div>
 
