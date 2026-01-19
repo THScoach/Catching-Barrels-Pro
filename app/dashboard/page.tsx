@@ -14,14 +14,13 @@ export default async function DashboardPage() {
     include: {
       lessons: {
         orderBy: { createdAt: "desc" },
-        take: 1,
+        take: 5, // Fetch top 5 for "Recent Lessons" list
         include: {
           swingVideos: {
             include: { swingMetrics: true },
           },
         },
       },
-      // swingVideos: true, // Removed as relation no longer exists
     },
   });
 
@@ -29,7 +28,13 @@ export default async function DashboardPage() {
   if (user.role === "parent") redirect("/parent-dashboard");
 
   const latestLesson = user.lessons[0];
-  const totalSwings = user.lessons.reduce((acc, lesson) => acc + lesson.totalSwings, 0);
+
+  // Efficiently count total swings across ALL lessons, not just the fetched ones
+  const totalSwingsCount = await prisma.swingVideo.count({
+    where: {
+      lesson: { userId: user.id }
+    }
+  });
 
   return (
     <div className="min-h-screen bg-cb-dark">
@@ -114,7 +119,7 @@ export default async function DashboardPage() {
           />
           <StatCard
             label="Total Swings"
-            value={totalSwings}
+            value={totalSwingsCount}
             icon="🎯"
           />
           <StatCard
