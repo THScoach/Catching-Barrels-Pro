@@ -42,6 +42,8 @@ export default async function AdminLayout({
                     <NavLink href="/admin/players" icon="⚾️" label="Pro Players" />
                     <NavLink href="/admin/analytics" icon="📈" label="Analytics" />
                     <NavLink href="/admin/content" icon="📚" label="Content" />
+                    <NavLink href="/admin/videos" icon="🎥" label="Video Library" />
+                    <NavLink href="/admin/inbox" icon="📨" label="Inbox" />
                     <NavLink href="/admin/lessons" icon="🎓" label="Lessons" />
                     <NavLink href="/admin/messages" icon="💬" label="Messages" />
                     <NavLink href="/admin/system" icon="⚙️" label="System Health" />

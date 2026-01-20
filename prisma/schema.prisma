@@ -14,6 +14,7 @@ model User {
   password String
   name     String
   role     String @default("athlete") // "parent" | "athlete" | "coach" | "admin"
+  phoneNumber String? @unique // For SMS/Twilio Integration
 
   // Parent-Athlete Relationship
   parentId String?
@@ -60,6 +61,7 @@ model User {
   playerProfile PlayerProfile?
   reminders     ProfileUpdateReminder[]
   Player        Player?
+  conversation  CoachingConversation?
 }
 
 model ProfileUpdateReminder {
@@ -529,6 +531,29 @@ model SensorSwing {
   energyLeak String? // "LATE_LEGS", "EARLY_ARMS", etc.
 }
 
+// --- COACHING INBOX SYSTEM ---
+
+model CoachingConversation {
+  id        String   @id @default(cuid())
+  userId    String?  @unique
+  user      User?    @relation(fields: [userId], references: [id])
+  phoneNumber String @unique // Stable identifier for SMS
+  status    String   @default("replied") // "needs_reply", "replied", "manual_override"
+  updatedAt DateTime @updatedAt
+  
+  messages  CoachingMessage[]
+  sessions  LiveSession[]
+}
+
+model CoachingMessage {
+  id             String   @id @default(cuid())
+  conversationId String
+  conversation   CoachingConversation @relation(fields: [conversationId], references: [id])
+  sender         String   // "user", "ai", "coach"
+  content        String
+  createdAt      DateTime @default(now())
+}
+
 // === MARKETING LEADS (Human 3.0 Quiz) ===
 model QuizAttempt {
   id        String   @id @default(cuid())
@@ -539,3 +564,60 @@ model QuizAttempt {
   
   createdAt DateTime @default(now())
 }
+
+// === META GLASSES AUTOMATION LIBRARY ===
+model VideoLibraryItem {
+  id          String   @id @default(cuid())
+  title       String   // Filename or auto-generated title
+  videoUrl    String   // Storage URL (Cloudinary/Supabase/S3)
+  
+  // AI Metadata
+  transcript  String?  @db.Text // Full Whisper transcription
+  vectorTag   String?  // "Spinner" | "Slingshotter" | "Whipper" | "General"
+  
+  // Pipeline Status
+  status      String   @default("pending") // "pending" | "approved" | "rejected"
+  driveFileId String?  @unique // To preventing duplicate ingestion from Drive
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  engagements VideoEngagement[]
+}
+
+// === ANALYTICS & KPI TRACKING ===
+
+model MessageAnalytics {
+  id        String   @id @default(cuid())
+  keyword   String   @unique
+  count     Int      @default(1)
+  lastSeen  DateTime @updatedAt
+}
+
+model VideoEngagement {
+  id        String   @id @default(cuid())
+  videoId   String // ID of VideoLibraryItem, referenced manually or relation
+  video     VideoLibraryItem @relation(fields: [videoId], references: [id])
+  userId    String? // Nullable (Lead)
+  viewedAt  DateTime @default(now())
+}
+
+// === LIVE LAB (Google Meet) ===
+
+model LiveSession {
+  id             String   @id @default(cuid())
+  conversationId String
+  conversation   CoachingConversation @relation(fields: [conversationId], references: [id])
+  
+  meetUrl        String
+  meetCode       String   // The random string code for file matching
+  status         String   @default("scheduled") // "scheduled", "active", "completed", "archived"
+  
+  recordingUrl   String?  // Drive Link
+  transcript     String?  @db.Text
+  summary        String?  @db.Text // "Rick's Recap"
+  
+  createdAt      DateTime @default(now())
+  endedAt        DateTime?
+}
+

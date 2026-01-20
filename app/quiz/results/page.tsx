@@ -51,6 +51,13 @@ function ResultsContent() {
                     </p>
                     <div className="p-8 bg-barrels-grey border border-gray-800 border-l-4 border-l-barrels-red shadow-2xl">
                         <span className="text-gray-500 text-xs uppercase font-bold tracking-widest block mb-2">Pro Comparison</span>
+                        <div className="w-full h-48 bg-black mb-4 border border-gray-800 relative">
+                            <img
+                                src={`/assets/media/reports/${type.toLowerCase()}-pro.jpg`}
+                                alt={profile.pro}
+                                className="w-full h-full object-cover opacity-90"
+                            />
+                        </div>
                         <span className="text-2xl font-black text-white uppercase italic">{profile.pro}</span>
                     </div>
 
@@ -94,13 +101,119 @@ function ResultsContent() {
                 </div>
 
             </div>
+
+            {/* PRICING ARCHITECTURE */}
+            <div className="max-w-6xl w-full mt-32">
+                <h2 className="text-4xl font-black uppercase text-center mb-16 tracking-tighter">
+                    Unlock Your <span className="text-barrels-red">Human 3.0</span> Potential
+                </h2>
+
+                <div className="grid md:grid-cols-2 gap-8 items-stretch">
+
+                    {/* OPTION 1: THE ACADEMY ($99/mo) - HERO PRODUCT */}
+                    <div className="border border-gray-800 bg-barrels-grey p-8 flex flex-col relative group hover:border-barrels-red transition-colors">
+                        <div className="absolute top-0 right-0 bg-barrels-red text-white text-[10px] font-black uppercase tracking-widest px-3 py-1">
+                            Most Popular
+                        </div>
+                        <h3 className="text-3xl font-black uppercase mb-2">The Academy</h3>
+                        <div className="flex items-baseline gap-2 mb-6">
+                            <span className="text-5xl font-black text-white">$99</span>
+                            <span className="text-gray-500 font-bold text-sm uppercase">/ Month</span>
+                        </div>
+
+                        {/* BADGE: SENSOR INCLUDED */}
+                        <div className="bg-white text-black text-center py-3 font-black uppercase tracking-widest text-xs mb-8 border border-gray-200">
+                            🎁 Free Smart Sensor Kit Included
+                        </div>
+
+                        <ul className="space-y-4 mb-8 flex-1">
+                            <li className="flex gap-3 text-sm font-bold text-gray-300">
+                                <span className="text-barrels-red">✓</span> Coach Rick AI (24/7 Access)
+                            </li>
+                            <li className="flex gap-3 text-sm font-bold text-gray-300">
+                                <span className="text-barrels-red">✓</span> Weekly Drill Assignments
+                            </li>
+                            <li className="flex gap-3 text-sm font-bold text-gray-300">
+                                <span className="text-barrels-red">✓</span> Force Vector Analysis
+                            </li>
+                            <li className="flex gap-3 text-sm font-bold text-gray-300">
+                                <span className="text-barrels-red">✓</span> Live Lab Session Access
+                            </li>
+                        </ul>
+
+                        <Link
+                            href="https://whop.com/checkout/academy-link"
+                            className="w-full text-center px-6 py-4 bg-barrels-red text-white font-black uppercase tracking-widest hover:bg-white hover:text-barrels-red transition-all rounded-none"
+                        >
+                            Join The Academy
+                        </Link>
+                    </div>
+
+                    {/* OPTION 2: VIP PRIVATE ($297/mo) - THE PIVOT */}
+                    <div className="border border-gray-800 bg-black p-8 flex flex-col relative group hover:border-gray-600 transition-colors opacity-90 hover:opacity-100">
+                        {/* WARNING BADGE */}
+                        <div className="bg-red-900/50 text-red-500 text-center py-2 font-black uppercase tracking-widest text-[10px] mb-6 border border-red-900">
+                            ⚠️ Limited to 20 Players
+                        </div>
+
+                        <h3 className="text-3xl font-black uppercase mb-2 text-gray-300">Private Coaching</h3>
+                        <div className="flex items-baseline gap-2 mb-6">
+                            <span className="text-5xl font-black text-white">$297</span>
+                            <span className="text-gray-500 font-bold text-sm uppercase">/ Month</span>
+                        </div>
+
+                        <ul className="space-y-4 mb-8 flex-1">
+                            <li className="flex gap-3 text-sm font-bold text-gray-300">
+                                <span className="text-white">★</span> Everything in Academy
+                            </li>
+                            <li className="flex gap-3 text-sm font-bold text-gray-300">
+                                <span className="text-white">★</span> 1-on-1 Zoom Swing Audits
+                            </li>
+                            <li className="flex gap-3 text-sm font-bold text-gray-300">
+                                <span className="text-white">★</span> Direct Text Line to Rick
+                            </li>
+                            <li className="flex gap-3 text-sm font-bold text-gray-300">
+                                <span className="text-white">★</span> Priority Video Analysis
+                            </li>
+                        </ul>
+
+                        <Link
+                            href="https://whop.com/checkout/vip-link"
+                            className="w-full text-center px-6 py-4 bg-white text-black font-black uppercase tracking-widest hover:bg-gray-200 transition-all rounded-none"
+                        >
+                            Apply for VIP
+                        </Link>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function ProcessingState() {
+    return (
+        <div className="min-h-screen bg-barrels-black flex flex-col items-center justify-center p-6 text-center font-barrels">
+            <div className="w-16 h-16 border-4 border-gray-800 border-t-barrels-red rounded-full animate-spin mb-8"></div>
+            <h2 className="text-2xl font-black uppercase text-white tracking-widest mb-2 animate-pulse">
+                Processing Biomechanics...
+            </h2>
+            <p className="text-gray-500 text-xs font-bold uppercase tracking-widest">
+                Analyzing Kinetic Fingerprint // <span className="text-barrels-red">Athlete Profile</span>
+            </p>
+            {/* Privacy Bar Visual */}
+            <div className="mt-8 bg-gray-900 px-8 py-4 border border-gray-800 opacity-50">
+                <div className="h-2 w-32 bg-gray-800 mb-2"></div>
+                <div className="h-2 w-48 bg-gray-800 mb-2"></div>
+                <div className="h-2 w-24 bg-gray-800"></div>
+            </div>
         </div>
     );
 }
 
 export default function ResultsPage() {
     return (
-        <Suspense fallback={<div className="min-h-screen bg-cb-dark flex items-center justify-center text-white">Loading Blueprint...</div>}>
+        <Suspense fallback={<ProcessingState />}>
             <ResultsContent />
         </Suspense>
     )
